@@ -5,9 +5,9 @@ from sqlalchemy import pool
 
 from alembic import context
 
-import sys
+
 from models import BaseModel
-sys.path.append(r"C:\Users\Kcюша\pcode\pp_project\lab6")
+
 
 
 # this is the Alembic Config object, which provides
@@ -16,7 +16,7 @@ config = context.config
 
 config.set_main_option(
     "sqlalchemy.url",
-    "mysql://root:mySQL.kt.1502@localhost:3306/lab6_database"
+    "mysql://root:password@localhost:3306/lab6_database"
 )
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

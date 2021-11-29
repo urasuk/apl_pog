@@ -1,4 +1,4 @@
-from models import Session, User, Medicine, Category, Order
+from models import Session, User, Medicine, Category, Order, OrdersMedicine
 
 session = Session()
 
@@ -25,23 +25,30 @@ medicine1 = Medicine(mid=446,
                      name='Spasmalgon',
                      manufacturer='Teva',
                      status='available',
-                     demand=True)
+                     demand=False)
 medicine2 = Medicine(mid=2426,
                      category=category1.cid,
                      name='Paracetamol',
                      manufacturer='Galychfarm',
                      status='available',
-                     demand=True)
+                     demand=False)
 order1 = Order(oid=9872,
                userId=user1.uid,
-               quantity=1,
                shipDate='2008-10-23 10:37:22',
                status='placed',
-               complete=True
                )
-
+order2 = Order(oid=9871,
+               userId=user1.uid,
+               shipDate='2008-10-23 10:37:22',
+               status='placed',
+               )
+order3 = Order(oid=9873,
+               userId=user1.uid,
+               shipDate='2008-10-23 10:37:22',
+               status='dscsdc',
+               )
 order1.medicine = [medicine1, medicine2]
-
+order2.medicine = [medicine1]
 session.add(user1)
 session.add(user2)
 
@@ -51,10 +58,11 @@ session.add(medicine1)
 session.add(medicine2)
 
 session.add(order1)
-
+session.add(order2)
+session.add(order3)
 session.commit()
 
-print(session.query(User).all())
+print(session.query(User).all()[0])
 print(session.query(Medicine).all())
 print(session.query(Order).all())
 
