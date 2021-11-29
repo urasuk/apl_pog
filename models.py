@@ -1,4 +1,5 @@
 from sqlalchemy import (
+    Table,
     Column,
     Integer,
     ForeignKey,
@@ -6,14 +7,13 @@ from sqlalchemy import (
     Boolean,
     DateTime
 )
+
 # from sqlalchemy import orm
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session, relationship
-import sys
-sys.path.append(r"C:\Users\Kcюша\pcode\pp_project\lab6")
 
-engine = create_engine('mysql://root:mySQL.kt.1502@localhost:3306/lab6_database')
+engine = create_engine('mysql://root:password@localhost:3306/lab6_database')
 
 SessionFactory = sessionmaker(bind=engine)
 
@@ -68,14 +68,10 @@ class Category(BaseModel):
 
 
 
-class OrdersMedicine(BaseModel):
-    __tablename__ = 'orders_medicine'
-
-    order_id = Column(Integer, ForeignKey('order.oid'))
-    medicine_id = Column(Integer, ForeignKey('medicine.mid'))
-
-    order = relationship("Order")
-    medicine = relationship("Medicine")
+OrdersMedicine = Table('orders_medicine', BaseModel.metadata,
+                       Column('order_id', ForeignKey('orders.oid')),
+                       Column('medicine_id', ForeignKey('medicine.mid'))
+                       )
 
 
 class Medicine(BaseModel):
@@ -87,6 +83,7 @@ class Medicine(BaseModel):
     manufacturer = Column(String(30))
     status = Column(String(30))
     demand = Column(Boolean)
+    orders = relationship("Order", secondary=OrdersMedicine, back_populates="medicine")
 
     def __str__(self):
         return f"Medicine id: {self.mid}\n" \
@@ -97,22 +94,17 @@ class Medicine(BaseModel):
                f"Demand: {self.demand}\n" \
 
 
-
 class Order(BaseModel):
-    __tablename__ = "order"
+    __tablename__ = "orders"
 
     oid = Column(Integer(), primary_key=True)
     userId = Column(Integer, ForeignKey('user.uid'))
-    quantity = Column(Integer())
     shipDate = Column(DateTime(6))
     status = Column(String(30))
-    complete = Column(Boolean)
-    medicine = relationship("Medicine", secondary=OrdersMedicine)
+    medicine = relationship("Medicine", secondary=OrdersMedicine, back_populates="orders")
 
     def __str__(self):
         return f"Order id: {self.oid}\n" \
                f"User id: {self.userId}\n" \
-               f"Quantity: {self.quantity}\n" \
                f"Ship date: {self.shipDate}\n" \
-               f"Status: {self.status}\n" \
-               f"Complete: {self.complete}\n" \
+               f"Status: {self.status}\n"
