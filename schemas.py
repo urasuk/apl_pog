@@ -6,7 +6,7 @@ from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 class UserSchema(Schema):
     class Meta:
         model = User
-        fields = ('uid', 'username', 'firstname', 'lastname', 'email', 'password', 'phone')
+        fields = ('uid', 'userstatus', 'username', 'firstname', 'lastname', 'email', 'password', 'phone')
 
 
 class OrderSchema(Schema):

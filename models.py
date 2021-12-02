@@ -13,7 +13,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session, relationship
 
-engine = create_engine('mysql://root:password@localhost:3306/lab6_database')
+#engine = create_engine('mysql://root:sqlLp9lp@localhost:3306/pharmacy')
+engine = create_engine('mysql+mysqlconnector://root:sqlLp9lp@localhost:3306/pharmacy')
 
 SessionFactory = sessionmaker(bind=engine)
 
@@ -38,21 +39,26 @@ class User(BaseModel):
     __tablename__ = "user"
 
     uid = Column(Integer(), primary_key=True)
-    username = Column(String(30))
-    firstname = Column(String(30))
-    lastname = Column(String(30))
-    email = Column(String(30))
-    password = Column(String(15))
-    phone = Column(String(15))
+    userstatus = Column(String(5), nullable=False)
+    username = Column(String(10), nullable=False)
+    firstname = Column(String(30), nullable=False)
+    lastname = Column(String(30), nullable=False)
+    email = Column(String(30), nullable=False)
+    password = Column(String(100), nullable=False)
+    phone = Column(String(10), nullable=False)
+
 
     def __str__(self):
         return f"User id: {self.uid}\n" \
+               f"User status: {self.userstatus}\n" \
+               f": {self.uid}\n" \
                f"Username: {self.username}\n" \
                f"Name: {self.firstname}\n" \
                f"Lastname: {self.lastname}\n" \
                f"Email: {self.email}\n" \
                f"Password: {self.password}\n" \
                f"Phone: {self.phone}\n" \
+
 
 
 
@@ -70,7 +76,8 @@ class Category(BaseModel):
 
 OrdersMedicine = Table('orders_medicine', BaseModel.metadata,
                        Column('order_id', ForeignKey('orders.oid')),
-                       Column('medicine_id', ForeignKey('medicine.mid'))
+                       Column('medicine_id', ForeignKey('medicine.mid')),
+                      # quantity=Column(Integer, nullable=False)
                        )
 
 

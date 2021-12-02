@@ -16,7 +16,8 @@ config = context.config
 
 config.set_main_option(
     "sqlalchemy.url",
-    "mysql://root:password@localhost:3306/lab6_database"
+    #"mysql://root:sqlLp9lp@localhost:3306/pharmacy"
+    "mysql+mysqlconnector://root:sqlLp9lp@localhost:3306/pharmacy"
 )
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
