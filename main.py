@@ -11,22 +11,26 @@ import bcrypt
 app = Flask(__name__)
 auth = HTTPBasicAuth()
 
-#@auth.verify_password
-def gverify_password_my(username, password):
-    session = Session()
-    try:
-        user_to_check = session.query(User).filter_by(username=username).one()
-    except: return jsonify(INCORRECT_USERNAME), 401
-        #b = bytes(password, 'utf-8')
-        #hashed_password = bcrypt.hashpw(b, bcrypt.gensalt())
-        #if bcrypt.hashpw(b, bcrypt.gensalt()) == user_to_check.password:
-        #if bcrypt.checkpw(hashed_password,user_to_check.password):
-    try:
-        if bcrypt.checkpw(password.encode('utf-8'),user_to_check.password.encode('utf-8')):
-            return user_to_check
 
-        else: return jsonify(BAD_PASSWORD), 401
-    except: return jsonify(SOMETHING_WENT_WRONG), 400
+# # @auth.verify_password
+# def gverify_password_my(username, password):
+#     session = Session()
+#     try:
+#         user_to_check = session.query(User).filter_by(username=username).one()
+#     except:
+#         return jsonify(INCORRECT_USERNAME), 401
+#     # b = bytes(password, 'utf-8')
+#     # hashed_password = bcrypt.hashpw(b, bcrypt.gensalt())
+#     # if bcrypt.hashpw(b, bcrypt.gensalt()) == user_to_check.password:
+#     # if bcrypt.checkpw(hashed_password,user_to_check.password):
+#     try:
+#         if bcrypt.checkpw(password.encode('utf-8'), user_to_check.password.encode('utf-8')):
+#             return user_to_check
+#
+#         else:
+#             return jsonify(BAD_PASSWORD), 401
+#     except:
+#         return jsonify(SOMETHING_WENT_WRONG), 400
 
 
 @app.route("/api/v15/hello-world-15")
@@ -44,14 +48,17 @@ def verify_password(username, password):
     session = Session()
     try:
         user_to_check = session.query(User).filter_by(username=username).one()
-    except: return jsonify(INCORRECT_USERNAME), 401
+    except:
+        return jsonify(INCORRECT_USERNAME), 401
 
     try:
         if bcrypt.checkpw(password.encode('utf-8'), user_to_check.password.encode('utf-8')):
             return user_to_check.uid, 200
 
-        else: return jsonify(BAD_PASSWORD), 401
-    except: return jsonify(SOMETHING_WENT_WRONG), 400
+        else:
+            return jsonify(BAD_PASSWORD), 401
+    except:
+        return jsonify(SOMETHING_WENT_WRONG), 400
 
 
 # All about user
@@ -82,7 +89,6 @@ def create_user():
 @app.route(BASE_PATH + USER_PATH + '/' + '<int:Id>', methods=['GET'])
 @auth.login_required()
 def get_user_by_userId(Id):
-
     current = auth.current_user()
 
     if current[1] != 200:
@@ -92,15 +98,15 @@ def get_user_by_userId(Id):
     current_o = session.query(User).filter_by(uid=current[0]).one()
 
     if current_o.userstatus == ADMIN or current_o.uid == Id:
-     try:
+        try:
             user = session.query(User).filter_by(uid=Id).one()
-     except:
+        except:
             return jsonify(USER_NOT_FOUND), 404
 
-     return jsonify(UserSchema().dump(user)), 200
+        return jsonify(UserSchema().dump(user)), 200
 
-    else: return jsonify(ACCESS_DENIED), 403
-
+    else:
+        return jsonify(ACCESS_DENIED), 403
 
 
 @app.route(BASE_PATH + USER_PATH, methods=['GET'])
@@ -197,34 +203,35 @@ def delete_user(uid):
         try:
             user = session.query(User).filter_by(uid=uid).one()
         except:
-         return jsonify(USER_NOT_FOUND), 404
+            return jsonify(USER_NOT_FOUND), 404
         session.delete(user)
         session.commit()
 
     return jsonify(USER_DELETED), 200
 
+
 # All about medicine
 @app.route(BASE_PATH + MEDICINE_PATH, methods=['POST'])
 @auth.login_required()
 def place_medicine():
-
     current = auth.current_user()
 
     if current[1] != 200:
         return current
 
-    if is_admin(User,current[0]):
+    if is_admin(User, current[0]):
         session = Session()
         medicine_request = request.get_json()
         try:
             try:
-             if session.query(Medicine).filter_by(mid=medicine_request.get('mid')).one():
-                return jsonify(MEDICINE_ALREADY_EXIST), 403
-            except: pass
+                if session.query(Medicine).filter_by(mid=medicine_request.get('mid')).one():
+                    return jsonify(MEDICINE_ALREADY_EXIST), 403
+            except:
+                pass
 
             path_stat = medicine_request.get('status')
             if path_stat == 'available' or path_stat == 'pending' or path_stat == 'unavailable':
-               medicine = Medicine(**medicine_request)
+                medicine = Medicine(**medicine_request)
             else:
                 return jsonify(INCORRECT_STATUS), 400
 
@@ -232,8 +239,9 @@ def place_medicine():
             session.commit()
             return jsonify(MEDICINE_PLACED), 201
         except:
-              return jsonify(SOMETHING_WENT_WRONG), 400
-    else: return jsonify(ACCESS_DENIED), 403
+            return jsonify(SOMETHING_WENT_WRONG), 400
+    else:
+        return jsonify(ACCESS_DENIED), 403
 
 
 @app.route(BASE_PATH + MEDICINE_PATH + '/' + '<int:medicineId>', methods=['GET'])
@@ -249,20 +257,18 @@ def get_medicine_by_id(medicineId):
 
 @app.route(BASE_PATH + MEDICINE_PATH, methods=['GET'])
 def get_all_medicines():
-
-   session = Session()
-   try:
+    session = Session()
+    try:
         medicines = session.query(Medicine).all()
-   except:
+    except:
         medicines = []
-   medicine_dto = MedicineSchema(many=True)
-   return jsonify(medicine_dto.dump(medicines)), 200
+    medicine_dto = MedicineSchema(many=True)
+    return jsonify(medicine_dto.dump(medicines)), 200
 
 
 @app.route(BASE_PATH + MEDICINE_PATH + '/' + '<int:medicineId>', methods=['DELETE'])
 @auth.login_required()
 def delete_medicine(medicineId):
-
     current = auth.current_user()
 
     if current[1] != 200:
@@ -284,7 +290,6 @@ def delete_medicine(medicineId):
 @app.route(BASE_PATH + MEDICINE_PATH + '/' + '<int:medicineId>', methods=['PUT'])
 @auth.login_required()
 def update_medicine(medicineId):
-
     current = auth.current_user()
 
     if current[1] != 200:
@@ -315,61 +320,58 @@ def update_medicine(medicineId):
         except:
             return jsonify(SOMETHING_WENT_WRONG), 400
     else:
-            return jsonify(ACCESS_DENIED), 403
+        return jsonify(ACCESS_DENIED), 403
 
 
 @app.route(BASE_PATH + DEMAND_MEDICINE_PATH + '/' + '<int:medicineId>', methods=['PUT'])
 @auth.login_required()
 def update2_medicine(medicineId):
+    current = auth.current_user()
 
-        current = auth.current_user()
+    if current[1] != 200:
+        return current
 
-        if current[1] != 200:
-            return current
-
-        session = Session()
-        update_request_demand = request.get_json()
+    session = Session()
+    update_request_demand = request.get_json()
+    try:
+        if update_request_demand.get('mid'):
+            return jsonify(CANT_CHANGE_ID), 400
+    except:
+        pass
+    try:
         try:
-            if update_request_demand.get('mid'):
-                return jsonify(CANT_CHANGE_ID), 400
+            medicine = session.query(Medicine).filter_by(mid=medicineId).one()
         except:
-            pass
-        try:
-            try:
-                medicine = session.query(Medicine).filter_by(mid=medicineId).one()
-            except:
-                return jsonify(MEDICINE_NOT_FOUND), 404
+            return jsonify(MEDICINE_NOT_FOUND), 404
 
-            set_false = {"demand":False}
-            set_true = {"demand":True}
+        set_false = {"demand": False}
+        set_true = {"demand": True}
 
-            # message for user
-            if MedicineSchema().dump(medicine).get('demand') == True and not is_admin(User, current[0]):
-                return jsonify('This product is already on demand :) '), 200
+        # message for user
+        if MedicineSchema().dump(medicine).get('demand') == True and not is_admin(User, current[0]):
+            return jsonify('This product is already on demand :) '), 200
 
-            # message for superuser
-            if MedicineSchema().dump(medicine).get('demand') == False and is_admin(User, current[0]):
-                return jsonify('This product is already NOT on demand. Admin, you don`t need to do it '), 200
+        # message for superuser
+        if MedicineSchema().dump(medicine).get('demand') == False and is_admin(User, current[0]):
+            return jsonify('This product is already NOT on demand. Admin, you don`t need to do it '), 200
 
-            if MedicineSchema().dump(medicine).get('demand') and is_admin(User, current[0]):
-                medicine.demand = set_false['demand']
+        if MedicineSchema().dump(medicine).get('demand') and is_admin(User, current[0]):
+            medicine.demand = set_false['demand']
 
-            elif MedicineSchema().dump(medicine).get('demand') == False \
-                    and not is_admin(User, current[0]):
+        elif MedicineSchema().dump(medicine).get('demand') == False \
+                and not is_admin(User, current[0]):
 
-                medicine.demand = set_true['demand']
-            else:
-                return jsonify(SOMETHING_WENT_WRONG), 400
-
-            if update_medicine == None:
-                return jsonify(SOMETHING_WENT_WRONG), 400
-
-            session.commit()
-            return jsonify(DEMAND_EDITED), 200
-        except:
+            medicine.demand = set_true['demand']
+        else:
             return jsonify(SOMETHING_WENT_WRONG), 400
 
+        if update_medicine == None:
+            return jsonify(SOMETHING_WENT_WRONG), 400
 
+        session.commit()
+        return jsonify(DEMAND_EDITED), 200
+    except:
+        return jsonify(SOMETHING_WENT_WRONG), 400
 
 
 # All about pharmacy
@@ -410,14 +412,12 @@ def create_order():
         except:
             return jsonify(SOMETHING_WENT_WRONG), 400
     else:
-            return jsonify(ACCESS_DENIED), 403
-
+        return jsonify(ACCESS_DENIED), 403
 
 
 @app.route(BASE_PATH + PHARMACY_ORDERS_MEDICINES_PATH, methods=['POST'])
 @auth.login_required()
 def create_order_medicine():
-
     current = auth.current_user()
 
     if current[1] != 200:
@@ -425,14 +425,13 @@ def create_order_medicine():
 
     if not is_admin(User, current[0]):
 
-
         try:
             order_request = request.get_json()
 
             session = Session()
 
-            #user_id_to_check = session.query(Order).filter_by(oid=order_request.get('order_id')).one().userId
-            user_id_to_check = uidFromOrder(Order,order_request.get('order_id'))
+            # user_id_to_check = session.query(Order).filter_by(oid=order_request.get('order_id')).one().userId
+            user_id_to_check = uidFromOrder(Order, order_request.get('order_id'))
 
             if current[0] != user_id_to_check:
                 return jsonify(ACCESS_DENIED), 403
@@ -454,13 +453,13 @@ def create_order_medicine():
         except:
             return jsonify(SOMETHING_WENT_WRONG), 400
     else:
-            return jsonify(ACCESS_DENIED), 403
+        return jsonify(ACCESS_DENIED), 403
 
 
-@app.route(BASE_PATH + PHARMACY_ORDERS_MEDICINES_PATH + '/' + '<int:orderId>' + '/' + '<int:medicineId>', methods=['DELETE'])
+@app.route(BASE_PATH + PHARMACY_ORDERS_MEDICINES_PATH + '/' + '<int:orderId>' + '/' + '<int:medicineId>',
+           methods=['DELETE'])
 @auth.login_required()
-def delete_medicine_from_order(orderId,medicineId):
-
+def delete_medicine_from_order(orderId, medicineId):
     current = auth.current_user()
 
     if current[1] != 200:
@@ -470,7 +469,8 @@ def delete_medicine_from_order(orderId,medicineId):
 
     try:
         order = session.query(Order).filter_by(oid=orderId).one()
-    except: return jsonify(ORDER_NOT_FOUND),404
+    except:
+        return jsonify(ORDER_NOT_FOUND), 404
 
     try:
         medicine = session.query(Medicine).filter_by(mid=medicineId).one()
@@ -478,7 +478,7 @@ def delete_medicine_from_order(orderId,medicineId):
         return jsonify(MEDICINE_NOT_FOUND), 404
 
     try:
-         session.query(OrdersMedicine).filter_by(order_id=orderId,medicine_id = medicineId).one()
+        session.query(OrdersMedicine).filter_by(order_id=orderId, medicine_id=medicineId).one()
     except:
         return jsonify('There is no such medicine in order!'), 404
 
@@ -492,19 +492,18 @@ def delete_medicine_from_order(orderId,medicineId):
         return jsonify(MEDICINE_DELETED_FROM_ORDER), 200
 
     else:
-            return jsonify(ACCESS_DENIED), 403
+        return jsonify(ACCESS_DENIED), 403
 
 
 @app.route(BASE_PATH + PHARMACY_ORDERS_MEDICINES_PATH, methods=['GET'])
 @auth.login_required()
 def get_all_order_medicine():
-
     current = auth.current_user()
 
     if current[1] != 200:
         return current
 
-    if is_admin(User,current[0]):
+    if is_admin(User, current[0]):
 
         session = Session()
         try:
@@ -527,7 +526,7 @@ def get_all_order():
     if current[1] != 200:
         return current
 
-    if is_admin(User,current[0]):
+    if is_admin(User, current[0]):
         session = Session()
         try:
             order = session.query(Order).all()
@@ -536,13 +535,13 @@ def get_all_order():
         order_dto = OrderSchema(many=True)
         return jsonify(order_dto.dump(order)), 200
 
-    else: return jsonify(ACCESS_DENIED),403
+    else:
+        return jsonify(ACCESS_DENIED), 403
 
 
 @app.route(BASE_PATH + PHARMACY_ORDERS_PATH + '/' + '<string:status>', methods=['GET'])
 @auth.login_required()
 def get_order_by_status(status):
-
     current = auth.current_user()
 
     if current[1] != 200:
@@ -554,16 +553,15 @@ def get_order_by_status(status):
 
         isStatusCorrect = False
         for ostatus in order_statuses:
-            if ostatus == status :
+            if ostatus == status:
                 isStatusCorrect = True
                 break
 
         if not isStatusCorrect:
-            return jsonify('You have entered a wrong status!'),404
-
+            return jsonify('You have entered a wrong status!'), 404
 
         try:
-            order = session.query(Order).filter_by(status=status,userId=current[0]).all()
+            order = session.query(Order).filter_by(status=status, userId=current[0]).all()
         except:
             return jsonify(ORDER_NOT_FOUND), 404
 
@@ -577,7 +575,6 @@ def get_order_by_status(status):
 @app.route(BASE_PATH + PHARMACY_ORDERS_PATH + '/' + '<int:orderId>', methods=['GET'])
 @auth.login_required()
 def get_order_by_id(orderId):
-
     current = auth.current_user()
 
     if current[1] != 200:
@@ -592,7 +589,7 @@ def get_order_by_id(orderId):
 
     userIdFromOrder = uidFromOrder(Order, orderId)
 
-    if (userIdFromOrder == current[0] or is_admin(User,current[0])):
+    if (userIdFromOrder == current[0] or is_admin(User, current[0])):
 
         return jsonify(OrderSchema().dump(order)), 200
     else:
@@ -602,7 +599,6 @@ def get_order_by_id(orderId):
 @app.route(BASE_PATH + PHARMACY_ORDERS_PATH + '/' + '<int:orderId>', methods=['DELETE'])
 @auth.login_required()
 def delete_order(orderId):
-
     current = auth.current_user()
 
     if current[1] != 200:
@@ -640,7 +636,7 @@ def create_medicine_category():
         order_request = request.get_json()
         try:
             if session.query(Category).filter_by(cid=order_request.get('cid')).one():
-                  return jsonify('Such category id already exists!')
+                return jsonify('Such category id already exists!')
         except:
             pass
         try:
@@ -656,10 +652,10 @@ def create_medicine_category():
         except:
             return jsonify(SOMETHING_WENT_WRONG), 400
     else:
-            return jsonify(ACCESS_DENIED), 403
+        return jsonify(ACCESS_DENIED), 403
 
 
-@app.route(BASE_PATH + MEDICINE_CATEGORY + '/'+'<int:cid>', methods=['DELETE'])
+@app.route(BASE_PATH + MEDICINE_CATEGORY + '/' + '<int:cid>', methods=['DELETE'])
 @auth.login_required()
 def delete_medicine_category(cid):
     current = auth.current_user()
@@ -681,7 +677,8 @@ def delete_medicine_category(cid):
         except:
             return jsonify(SOMETHING_WENT_WRONG), 400
     else:
-            return jsonify(ACCESS_DENIED), 403
+        return jsonify(ACCESS_DENIED), 403
+
 
 if __name__ == '__main__':
     app.run(debug=True)
