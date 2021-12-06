@@ -12,37 +12,6 @@ app = Flask(__name__)
 auth = HTTPBasicAuth()
 
 
-# # @auth.verify_password
-# def gverify_password_my(username, password):
-#     session = Session()
-#     try:
-#         user_to_check = session.query(User).filter_by(username=username).one()
-#     except:
-#         return jsonify(INCORRECT_USERNAME), 401
-#     # b = bytes(password, 'utf-8')
-#     # hashed_password = bcrypt.hashpw(b, bcrypt.gensalt())
-#     # if bcrypt.hashpw(b, bcrypt.gensalt()) == user_to_check.password:
-#     # if bcrypt.checkpw(hashed_password,user_to_check.password):
-#     try:
-#         if bcrypt.checkpw(password.encode('utf-8'), user_to_check.password.encode('utf-8')):
-#             return user_to_check
-#
-#         else:
-#             return jsonify(BAD_PASSWORD), 401
-#     except:
-#         return jsonify(SOMETHING_WENT_WRONG), 400
-
-
-@app.route("/api/v15/hello-world-15")
-def hello_world():
-    return "<p>Hello World 15</p>"
-
-
-@app.route("/api/v15/hello-world")
-def hello_world2():
-    return "<p>Hello World</p>"
-
-
 @auth.verify_password
 def verify_password(username, password):
     session = Session()
@@ -143,18 +112,13 @@ def update_user(Id):
         return jsonify(ACCESS_DENIED), 403
 
     try:
-        if request.json['Id']:
+        if request.json['uid']:
             return jsonify(CANT_CHANGE_ID), 400
     except:
         pass
     try:
         update_request = request.get_json()
-
-        try:
-            user = session.query(User).filter_by(uid=Id).one()
-        except:
-            return jsonify(USER_NOT_FOUND), 404
-
+        user = session.query(User).filter_by(uid=Id).one()
         if update_request.get('password'):
             # password hashing ------------------------------------
             password = update_request.get('password')
@@ -225,7 +189,7 @@ def place_medicine():
         try:
             try:
                 if session.query(Medicine).filter_by(mid=medicine_request.get('mid')).one():
-                    return jsonify(MEDICINE_ALREADY_EXIST), 403
+                    return jsonify(MEDICINE_ALREADY_EXIST), 400
             except:
                 pass
 
@@ -298,7 +262,7 @@ def update_medicine(medicineId):
     if is_admin(User, current[0]):
         session = Session()
         try:
-            if request.json['medicineId']:
+            if request.json['mid']:
                 return jsonify(CANT_CHANGE_ID), 400
         except:
             pass
@@ -333,11 +297,11 @@ def update2_medicine(medicineId):
 
     session = Session()
     update_request_demand = request.get_json()
-    try:
-        if update_request_demand.get('mid'):
-            return jsonify(CANT_CHANGE_ID), 400
-    except:
-        pass
+    # try:
+    #     if update_request_demand.get('mid'):
+    #         return jsonify(CANT_CHANGE_ID), 400
+    # except:
+    #     pass
     try:
         try:
             medicine = session.query(Medicine).filter_by(mid=medicineId).one()

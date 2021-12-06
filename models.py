@@ -115,3 +115,5 @@ class Order(BaseModel):
                f"User id: {self.userId}\n" \
                f"Ship date: {self.shipDate}\n" \
                f"Status: {self.status}\n"
+
+

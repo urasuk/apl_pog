@@ -18,3 +18,11 @@ venv\Scripts\activate
 waitress-serve --host 127.0.0.1 --port=5000 --call "main:create_app"
 
 curl -v -XGET http://localhost:5000/api/v1/hello-world-15
+
+
+#For testing:
+
+coverage run app_tests.py
+
+coverage report
+
