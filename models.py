@@ -14,7 +14,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session, relationship
 
 #engine = create_engine('mysql://root:sqlLp9lp@localhost:3306/pharmacy')
-engine = create_engine('mysql+mysqlconnector://root:sqlLp9lp@localhost:3306/pharmacy')
+engine = create_engine('mysql+mysqlconnector://root:root@localhost:3306/pharmacy')
 
 SessionFactory = sessionmaker(bind=engine)
 
@@ -115,3 +115,5 @@ class Order(BaseModel):
                f"User id: {self.userId}\n" \
                f"Ship date: {self.shipDate}\n" \
                f"Status: {self.status}\n"
+
+
